@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>OneAPI Exchange :: OperatorID Demo</title>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="operatorid.js"></script>
+
+<script type="text/javascript">
+
+function startDiscovery() {
+    jQuery('#status').val('Initiating discovery call');
+    jQuery.ajax({
+	async: true,
+	cache: false,
+	data: 'redirect_uri=http://localhost/discoverycomplete.html',
+	beforeSend: function(jqXHR) {
+                jqXHR.setRequestHeader("accept", "application/json");
+		jqXHR.setRequestHeader ("Authorization", "Basic "+btoa("2LKjpfVJAw3M6GF6bXsD2Rjtgd5drSxU:"));
+        },
+	error: function(jqXHR, status, error) {
+		jQuery('#status').val('Error occurred '+JSON.stringify(error));
+	},
+	success: function(data, status, jqXHR) {
+		if (data.response && data.response.application_id && data.response.apis && data.response.apis.operatorid) {
+			applicationid=data.response.application_id;
+			uri=data.response.apis.operatorid.uri;
+			jQuery('#status').val('Invoking OperatorID service at '+uri); 
+
+			MakeOpenIDRequest(uri, 'status', 'http://localhost/identified.html', 'http://localhost');
+		} else if (data.links && data.links[0] && data.links[0].href) {
+			var newloc=data.links[0].href;
+			if (newloc) {
+				jQuery('#status').val('redirecting to '+newloc);
+				window.location=newloc;
+			}
+		}
+	},
+	type: 'GET',
+	xhrFields: { withCredentials: true },
+	url: 'http://dt.gsmaoneapiexchange.com/v1/discovery/apis'
+    });
+}
+
+jQuery(document).ready(function() {
+	jQuery('#status').val('Not started');
+});
+
+</script>
+
+</head>
+<body>
+<h1>OneAPI Exchange :: OperatorID Demo</h1>
+
+<p>This is a demonstration of OneAPI OperatorID. When you are ready to start please click the 'Start now' link below</p>
+
+<p><a href='#' onClick='startDiscovery(); return false;'>Start now</a></p>
+
+<p><strong>Status</strong></p>
+
+<textarea name='status' id='status' style='width:300px; height:120px'></textarea>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<html>
+<head>
+<title>Discovery complete</title>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="operatorid.js"></script>
+
+<script type="text/javascript">
+
+var params = {};
+var applicationid;
+var uri;
+
+jQuery(document).ready(function() {
+    if (location.search) {
+    	var parts = location.search.substring(1).split('&');
+    	for (var i = 0; i < parts.length; i++) {
+            var nv = parts[i].split('=');
+            if (!nv[0]) continue;
+		    var key=decodeURIComponent(nv[0]);
+		    var val=decodeURIComponent(nv[1]);
+		    params[key] = val || true;
+		    if (key=='mcc_mnc') {
+				jQuery('#mccmnc').val(val);
+				jQuery('#status').val('Retrieving endpoints');
+				jQuery.ajax({
+	        		async: true,
+	        		cache: false,
+	        		beforeSend: function(jqXHR) {
+                		jqXHR.setRequestHeader("accept", "application/json");
+                		jqXHR.setRequestHeader ("Authorization", "Basic "+btoa("2LKjpfVJAw3M6GF6bXsD2Rjtgd5drSxU:"));
+	        		},
+					data:{'mcc_mnc':val},
+	        		error: function(jqXHR, status, error) {
+	                	jQuery('#status').val('Error occurred '+JSON.stringify(error));
+	        		},
+	        		success: function(data, status, jqXHR) {
+                		if (data.response && data.response.application_id && data.response.apis && data.response.apis.operatorid) {
+                       		applicationid=data.response.application_id;
+                       		uri=data.response.apis.operatorid.uri;
+                       		jQuery('#status').val('Invoking OperatorID service at '+uri);
+
+                        	MakeOpenIDRequest(uri, 'status', 'http://localhost/identified.html', 'http://localhost');
+                        }
+	        		},
+	        		type: 'GET',
+	        		xhrFields: { withCredentials: true },
+	        		url: 'http://dt.gsmaoneapiexchange.com/v1/discovery/apis'
+			    }); 
+       	    }
+        }
+    }
+});
+
+</script>
+
+</head>
+
+<body>
+<h3>Discovery complete</h3>
+
+<p>MCC/MNC</p>
+
+<p><input type='text' name='mccmnc' id='mccmnc' value='' style='width:120px'/></p>
+
+<p><strong>Status</strong></p>
+
+<textarea name='status' id='status' style='width:300px; height:120px'></textarea>
+</body>
+</html>

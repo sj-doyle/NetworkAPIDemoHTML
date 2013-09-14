@@ -1,0 +1,50 @@
+<html>
+<head>
+<title>Identification complete</title>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+var params = {};
+
+jQuery(document).ready(function() {
+    if (location.search) {
+    	var parts = location.search.substring(1).split('&');
+
+    	for (var i = 0; i < parts.length; i++) {
+            var nv = parts[i].split('=');
+            if (!nv || !nv[0]) continue;
+		    var key=decodeURIComponent(nv[0]);
+		    var val=decodeURIComponent(nv[1]);
+		    params[key] = val || true;
+		    if (console && console.log) console.log(key+" = "+val);
+		    if (key=='openid.mode') {
+				if (val=='id_res') {
+				    jQuery('#statusIndicator').val('Identified');
+				}
+			} 
+			if (key=='openid.identity') {
+				jQuery('#identity').val(val);
+		    }
+        }
+    }
+});
+
+</script>
+
+</head>
+
+<body>
+<h3>Identification complete</h3>
+
+<p>Status</p>
+
+<p><input type='text' name='statusIndicator' id='statusIndicator' value='' style='width:300px'/></p>
+
+<p>Identity</p>
+<p><textarea name='identity' id='identity' readonly='readonly' style='width:400px'></textarea></p>
+
+<p><a href='index.html'>Start again</a></p>
+</body>
+</html>
